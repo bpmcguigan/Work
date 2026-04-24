@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leadership Program Planner</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --border: #dbe3ef;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: 1.75rem;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      font-size: 0.94rem;
+    }
+
+    input, textarea, button {
+      font: inherit;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.65rem 0.75rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    button {
+      border: none;
+      background: var(--accent);
+      color: white;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 0.8rem;
+    }
+
+    button:hover { filter: brightness(0.95); }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .stat {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem;
+      background: #fafcff;
+    }
+
+    .stat p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .stat h3 {
+      margin: 0.25rem 0 0;
+      font-size: 1rem;
+      word-break: break-word;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    th, td {
+      padding: 0.7rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: #eff5ff;
+      font-size: 0.92rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-style: italic;
+      text-align: center;
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="card">
+      <h1>Leadership Program Planner</h1>
+      <p class="subtitle">Enter your program details and generate a milestone table.</p>
+
+      <form id="programForm">
+        <div class="grid">
+          <div>
+            <label for="programName">Program Name</label>
+            <input id="programName" name="programName" type="text" placeholder="e.g., Emerging Leaders 2026" required>
+          </div>
+          <div>
+            <label for="launchDate">Launch Date</label>
+            <input id="launchDate" name="launchDate" type="date" required>
+          </div>
+          <div>
+            <label for="cohortSize">Cohort Size</label>
+            <input id="cohortSize" name="cohortSize" type="number" min="1" placeholder="e.g., 30" required>
+          </div>
+        </div>
+
+        <div style="margin-top: 0.9rem;">
+          <label for="milestones">Key Milestones (one per line)</label>
+          <textarea id="milestones" name="milestones" placeholder="Application window opens&#10;Orientation session&#10;Mid-program review&#10;Graduation event" required></textarea>
+        </div>
+
+        <button type="submit">Generate Milestone Table</button>
+      </form>
+    </section>
+
+    <section class="card" id="outputCard" aria-live="polite">
+      <div class="summary">
+        <div class="stat">
+          <p>Program</p>
+          <h3 id="summaryName">Not set</h3>
+        </div>
+        <div class="stat">
+          <p>Launch Date</p>
+          <h3 id="summaryDate">Not set</h3>
+        </div>
+        <div class="stat">
+          <p>Cohort Size</p>
+          <h3 id="summaryCohort">Not set</h3>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 70px;">#</th>
+            <th>Key Milestone</th>
+          </tr>
+        </thead>
+        <tbody id="milestoneBody">
+          <tr>
+            <td colspan="2" class="empty">Milestones will appear here after you submit the form.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('programForm');
+    const summaryName = document.getElementById('summaryName');
+    const summaryDate = document.getElementById('summaryDate');
+    const summaryCohort = document.getElementById('summaryCohort');
+    const milestoneBody = document.getElementById('milestoneBody');
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const name = formData.get('programName').toString().trim();
+      const date = formData.get('launchDate').toString();
+      const cohort = formData.get('cohortSize').toString().trim();
+      const milestonesRaw = formData.get('milestones').toString();
+
+      const milestones = milestonesRaw
+        .split(/\n+/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+
+      summaryName.textContent = name || 'Not set';
+      summaryDate.textContent = date
+        ? new Date(`${date}T00:00:00`).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+        : 'Not set';
+      summaryCohort.textContent = cohort ? `${cohort} participants` : 'Not set';
+
+      milestoneBody.innerHTML = '';
+
+      if (milestones.length === 0) {
+        milestoneBody.innerHTML = '<tr><td colspan="2" class="empty">Add at least one milestone.</td></tr>';
+        return;
+      }
+
+      milestones.forEach((milestone, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${index + 1}</td><td>${milestone}</td>`;
+        milestoneBody.appendChild(row);
+      });
+    });
+  </script>
+</body>
+</html>
